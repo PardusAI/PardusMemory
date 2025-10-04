@@ -129,7 +129,8 @@ Remember: Focus on preserving maximum information rather than brevity. Include a
                     temperature=0.1  # Low temperature for consistent, factual output
                 )
                 
-                summary = response.choices[0].message.content.strip()
+                summary = response.choices[0].message.content or ""
+                summary = summary.strip()
                 
             except Exception as e:
                 raise RuntimeError(f"Failed to compress content: {e}")
@@ -188,7 +189,8 @@ class MockCompressor(LLMCompressor):
             summary = "COMPRESSED SUMMARY:\n\n"
             for i, item in enumerate(content_list, 1):
                 content = self._format_content(item)
-                summary += f"Item {i}: {content[:200]}{'...' if len(content) > 200 else ''}\n\n"
+                if content:
+                    summary += f"Item {i}: {content[:200]}{'...' if len(content) > 200 else ''}\n\n"
             
             summary += f"\n[Total items compressed: {len(content_list)}]"
         

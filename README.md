@@ -74,37 +74,48 @@ compressed_conversation = compressor.compress(conversation, return_as_conversati
 # Returns: [{"role": "assistant", "content": "React is a JavaScript library..."}]
 ```
 
-### Knowledge Graph Generation
+### Knowledge Graph with Automatic Edge Formation
 
 ```python
-from pardusmemory import KnowledgeGraphGenerator
+from pardusmemory import MemoryGraph, MockEmbeddingService, CosineSimilarity
 
-generator = KnowledgeGraphGenerator(
+# Create memory graph with automatic edge formation
+graph = MemoryGraph(
     embedding_service=MockEmbeddingService(),
-    similarity_threshold=0.7
+    similarity_function=CosineSimilarity(),
+    similarity_threshold=0.7  # Edges form when similarity > 0.7
 )
 
-text = """
-Python is a high-level programming language. It supports multiple programming paradigms.
-Machine learning is a subset of artificial intelligence. Python is widely used in machine learning.
-"""
+# Add entries - edges are created automatically based on similarity
+graph.add_entry("Machine learning uses algorithms to find patterns.")
+graph.add_entry("Deep learning is a subset of machine learning.")
+graph.add_entry("Neural networks are used in deep learning models.")
 
-# Generate knowledge graph
-knowledge_graph = generator.generate_knowledge_graph(text)
+# Get graph statistics
+stats = graph.get_graph_stats()
+print(f"Nodes: {stats['num_nodes']}, Edges: {stats['num_edges']}")
 
-# Access graph data
-nodes = knowledge_graph.get_nodes()
-edges = knowledge_graph.get_edges()
+# Find connected entries for a specific node
+entry_id = list(graph.entries.keys())[0]
+connected = graph.get_connected_entries(entry_id)
+for entry, weight in connected:
+    print(f"Connected: {entry.content} (similarity: {weight:.3f})")
 
-print(f"Generated {len(nodes)} nodes and {len(edges)} edges")
+# Analyze graph structure
+components = graph.find_connected_components()
+print(f"Graph has {len(components)} connected components")
+
+# Visualize the graph (requires networkx and matplotlib)
+# graph.visualize_graph(layout="spring")
 ```
 
 ## 🏗️ Architecture
 
 ### Core Components
 
-- **MemoryGraph**: Core memory management with similarity-based retrieval
-- **KnowledgeGraph**: Graph structure for semantic relationships
+- **MemoryGraph**: Knowledge graph with automatic edge formation based on similarity thresholds
+- **MemoryEntry**: Nodes in the graph representing text entries with embeddings
+- **GraphEdge**: Edges connecting entries with similarity weights
 - **EmbeddingService**: Pluggable embedding generation (OpenAI, Mock, Custom)
 - **LLMCompressor**: LLM-based knowledge compression
 - **Database**: Persistent storage with JSON backend
@@ -184,27 +195,41 @@ knowledge_graph.export_to_networkx("graph.graphml")
 
 ```python
 class MemoryGraph:
-    def add_entry(self, content: str, entry_id: str = None, metadata: dict = None) -> str
+    def __init__(self, similarity_function=None, embedding_service=None, database=None, similarity_threshold=0.7)
+    def add_entry(self, content: str, entry_id: str = None, metadata: dict = None, auto_connect: bool = True) -> str
     def find_similar(self, query: str, top_k: int = 5, threshold: float = 0.0) -> List[Tuple[MemoryEntry, float]]
+    def get_neighbors(self, entry_id: str) -> List[str]
+    def get_connected_entries(self, entry_id: str) -> List[Tuple[MemoryEntry, float]]
+    def find_connected_components(self) -> List[Set[str]]
+    def get_graph_stats(self) -> dict
+    def rebuild_graph(self, new_threshold: float = None) -> None
+    def visualize_graph(self, output_path: str = None, layout: str = "spring") -> None
+    def export_graph_data(self) -> dict
     def compress_entries(self, entry_ids: List[str], compressor) -> str
     def compress_conversation(self, conversation: List[Dict], compressor) -> str
     def get_entry(self, entry_id: str) -> MemoryEntry
     def get_all_entries(self) -> List[MemoryEntry]
 ```
 
-### KnowledgeGraph
+### MemoryEntry and GraphEdge
 
 ```python
-class KnowledgeGraph:
-    def add_node(self, content: str, node_id: str = None, metadata: dict = None) -> str
-    def add_edge(self, source_id: str, target_id: str, weight: float = 1.0, metadata: dict = None) -> str
-    def get_nodes(self) -> List[GraphNode]
-    def get_edges(self) -> List[GraphEdge]
-    def get_neighbors(self, node_id: str) -> List[GraphNode]
-    def get_statistics(self) -> dict
-    def get_central_nodes(self, top_k: int = 5) -> List[Tuple[str, float]]
-    def export_to_json(self, filepath: str) -> None
-    def export_to_networkx(self, filepath: str) -> None
+@dataclass
+class MemoryEntry:
+    id: str
+    content: str
+    embedding: Optional[np.ndarray] = None
+    metadata: Dict[str, Any] = field(default_factory=dict)
+    timestamp: datetime = field(default_factory=datetime.now)
+    compressed: bool = False
+
+@dataclass
+class GraphEdge:
+    source_id: str
+    target_id: str
+    weight: float
+    metadata: Dict[str, Any] = field(default_factory=dict)
+    timestamp: datetime = field(default_factory=datetime.now)
 ```
 
 ### LLMCompressor
@@ -223,6 +248,7 @@ The `examples/` directory contains comprehensive examples:
 - `agent_integration.py` - Complete agent workflow
 - `conversation_compression_demo.py` - Conversation format compression
 - `knowledge_graph_demo.py` - Knowledge graph generation and analysis
+- `graph_connectivity_demo.py` - Testing different similarity thresholds
 
 Run examples with:
 
@@ -230,6 +256,7 @@ Run examples with:
 python examples/basic_usage.py
 python examples/agent_integration.py
 python examples/knowledge_graph_demo.py
+python examples/graph_connectivity_demo.py
 ```
 
 ## 🤝 Contributing

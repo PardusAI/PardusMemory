@@ -40,11 +40,17 @@ class OpenAIEmbeddingService(EmbeddingService):
     def get_embedding(self, text: str) -> List[float]:
         """Get embedding for a given text using OpenAI."""
         try:
-            response = self.client.embeddings.create(
-                model=self.model,
-                input=text,
-                dimensions=self.dimensions
-            )
+            if self.dimensions is not None:
+                response = self.client.embeddings.create(
+                    model=self.model,
+                    input=text,
+                    dimensions=self.dimensions
+                )
+            else:
+                response = self.client.embeddings.create(
+                    model=self.model,
+                    input=text
+                )
             return response.data[0].embedding
         except Exception as e:
             raise RuntimeError(f"Failed to get embedding: {e}")

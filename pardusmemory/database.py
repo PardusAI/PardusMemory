@@ -33,7 +33,7 @@ class JSONDatabase:
         entry_dict = {
             "id": entry.id,
             "content": entry.content,
-            "embedding": entry.embedding.tolist() if hasattr(entry.embedding, 'tolist') else entry.embedding if entry.embedding is not None else None,
+            "embedding": entry.embedding.tolist() if entry.embedding is not None and hasattr(entry.embedding, 'tolist') else entry.embedding if entry.embedding is not None else None,
             "metadata": entry.metadata,
             "timestamp": entry.timestamp.isoformat(),
             "compressed": entry.compressed
