@@ -270,19 +270,3 @@ python examples/graph_connectivity_demo.py
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- OpenAI for the embedding and compression APIs
-- NetworkX for graph algorithms inspiration
-- The Python community for excellent tools and libraries
-
-## 📞 Support
-
-- 📧 Email: support@pardusmemory.com
-- 🐛 Issues: [GitHub Issues](https://github.com/your-repo/pardusmemory/issues)
-- 📖 Documentation: [Full Documentation](https://pardusmemory.readthedocs.io)
-
----
-
-**PardusMemory** - Advanced memory management for the next generation of AI agents. 🚀
