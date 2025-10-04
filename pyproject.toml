@@ -1,0 +1,12 @@
+[project]
+name = "pardusmemory"
+version = "0.1.0"
+description = "A memory graph system with custom similarity rules, configurable embeddings, and LLM-based knowledge compression"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "openai>=1.0.0",
+    "numpy>=1.24.0",
+    "pydantic>=2.0.0",
+    "typing-extensions>=4.5.0"
+]
