@@ -18,10 +18,6 @@ A sophisticated memory graph system with custom similarity rules, configurable e
 
 ## 📦 Installation
 
-```bash
-pip install pardusmemory
-```
-
 ### Development Installation
 
 ```bash
